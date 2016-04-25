@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="내주변 주유소 찾기" />
+	<meta property="og:url" content="http://my.yjteam.co.kr/finder.html" />
+	<meta property="og:description" content="내주변에 있는 주유소를 찾아보고 가격비교를 해보세요" />
+	<meta property="og:image" content="img/logo.png" />
+	
+	<title>내주변 주유소 찾기</title>
+	
+	<style type="text/css">
+		@import url(https://cdn.rawgit.com/theeluwin/NotoSansKR-Hestia/master/stylesheets/NotoSansKR-Hestia.css);
+		
+		html{
+			width: 100%;
+			height: 100%;
+			-webkit-font-smoothing: antialiased;
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+		}
+		body{
+			padding: 0;
+			margin: 0;
+			width: 100%;
+			height: 100%;
+			position: relative;
+			font-family: "Noto Sans Korean","맑은고딕","Malgun Gothic","Apple SD Gothic Neo","돋움",dotum,Arial,sans-serif;
+			font-weight: 300;
+			font-size: 14px;
+			line-height: 1.428571429;
+			-webkit-font-smoothing: antialiased;
+		}
+		select,button,input{
+			font-family: "Noto Sans Korean","맑은고딕","Malgun Gothic","Apple SD Gothic Neo","돋움",dotum,Arial,sans-serif;
+		}
+		.map-wrapper{
+			height: 100%;
+			padding-right: 280px;
+		}
+		#stationList{
+			width: 280px;
+			height: 100%;
+			position: absolute;
+			top: 0;
+			right: 0;
+			list-style: none;
+			padding-left: 0;
+			margin: 0;
+			overflow-x: hidden;
+			overflow-y: auto;
+			background-color: #fff;
+			box-shadow: 0 2px 2px rgba(0,0,0,.075),-1px 1px 1px rgba(0,0,0,.03),1px 1px 1px rgba(0,0,0,.03);
+		}
+		#stationList > li{
+			width: 100%;
+			padding: 15px 0;
+			cursor: pointer;
+			position: relative;
+			border-bottom: 1px solid #eee;
+		}
+		#stationList > li:hover, #stationList > li:focus{
+			background-color: #eee;
+		}
+		#stationList > li.loading {
+			background-color: #fff!important;
+			text-align: center;
+			position: absolute;
+			border-bottom: 0;
+			top: 50%;
+			margin-top: -11px;
+		}
+		#stationList > li > .logo{
+			position: absolute;
+			top: 15px;
+			left: 5px;
+		}
+		#stationList > li > .name{
+			padding-left: 65px;
+			padding-right: 70px;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+		}
+		#stationList > li > .price{
+			position: absolute;
+			right: 5px;
+			top: 15px;
+		}
+		#stationList > li > .price > strong{
+			color: #ff3e00;
+		}
+
+		.maker-window{
+			font-size: 14px;
+			color: #ff3e00;
+			font-weight: bold;
+			padding: 6px 8px 6px 30px;
+			-webkit-border-radius: 4px;
+			border-radius: 4px;
+			background-color: #fff;
+			white-space: nowrap;
+			position: relative;
+			box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.22);
+			-webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.22);
+			cursor: pointer;
+			z-index: 9998;
+		}
+		.maker-window:after{
+			position: absolute;
+			bottom: -8px;
+			left: 50%;
+			margin-left: -8px;
+			display: inline-block;
+			border-right: 8px solid transparent;
+			border-top: 8px solid #ffffff;
+			border-left: 8px solid transparent;
+			content: '';
+		}
+		.maker-window:before{
+			position: absolute;
+			bottom: -9px;
+			left: 50%;
+			margin-left: -9px;
+			display: inline-block;
+			border-right: 9px solid transparent;
+			border-top: 9px solid #e4e4e4;
+			border-left: 9px solid transparent;
+			content: '';
+		}
+		.maker-window > .logo{
+			position: absolute;
+			top: 6px;
+			left: 8px;
+			width: 19px;
+			height: 16px;
+			display: inline-block;
+			background: url("img/ico_spr4.png") no-repeat;
+			background-size: 130px 75px;
+			-webkit-background-size: 130px 75px;
+			margin-right: 6px;
+		}
+		.maker-window > .logo.SKE{
+			background-position: 0 0;
+		}
+		.maker-window > .logo.GSC{
+			background-position: 0 -21px;
+		}
+		.maker-window > .logo.SOL{
+			background-position: -21px -21px;
+		}
+		.maker-window > .logo.RTX, .maker-window > .logo.RTO{
+			background-position: -43px -21px;
+		}
+		.maker-window > .logo.HDO{
+			background-position: -21px 0;
+		}
+		.maker-window > .logo.ETC, .maker-window > .logo.NCO{
+			background-position: -64px -19px;
+		}
+		.maker-window > .logo.NHO{
+			background-position: -63px 0;
+		}
+		.info-window{
+			font-size: 14px;
+			padding: 15px;
+			-webkit-border-radius: 4px;
+			border-radius: 4px;
+			background-color: #fff;
+			white-space: nowrap;
+			position: relative;
+			box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.22);
+			-webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.22);
+			z-index: 9999;
+		}
+		.info-window > .info-top{
+			padding-bottom: 10px;
+			font-weight: bold;
+		}
+		.info-window > table{
+			border: 1px solid #ddd;
+		}
+		.info-window > table, .info-window > td{
+			border-collapse: collapse;
+		}
+		.info-window > table tr{
+			border-bottom: 1px solid #ddd;
+		}
+		.info-window > table tr.price > td > strong{
+			color: #ff3e00;
+		}
+		.info-window > table td{
+			border: 1px solid #eee;
+			text-align: center;
+			padding: 10px;
+		}
+		
+		.layer{
+			border: 1px solid #cecece;
+			border-bottom: 1px solid silver;
+			border-top: 1px solid #e9e9e9;
+			background-color: #fff;
+			box-shadow: 0 2px 2px rgba(0,0,0,.075),-1px 1px 1px rgba(0,0,0,.03),1px 1px 1px rgba(0,0,0,.03);
+			-webkit-border-radius: 4px;
+			border-radius: 4px;
+		}
+
+		.filterLayer{
+			position: absolute;
+			z-index: 100;
+			top: 25px;
+			left: 25px;
+			font-size: 14px;
+			padding: 10px 0;
+			cursor: pointer;
+			overflow: hidden;
+		}
+		.filterLayer > .filter-wrap{
+			padding-right: 25px;
+			position: relative;
+			display: inline-block;
+		}
+		.filterLayer > .filter-wrap:after{
+			color: #ccc;
+			position: absolute;
+			top: 8px;
+			right: 5px;
+			content: ' ';
+			display: inline-block;
+			width: 0;
+			height: 0;
+			margin-left: 2px;
+			vertical-align: middle;
+			border-top: 4px dashed;
+			border-top: 4px solid\9;
+			border-right: 4px solid transparent;
+			border-left: 4px solid transparent;
+		}
+		.filterLayer > .filter-wrap > span{
+			padding-left: 10px;
+			z-index: 100;
+		}
+		.filterLayer > .filter-wrap > select{
+			width: 100%;
+			height: 30px;
+			position: absolute;
+			top: 0;
+			left: 0;
+			font-size: 14px;
+			opacity: 0;
+			cursor: pointer;
+		}
+		
+		#reloadLocationLayer{
+			position: absolute;
+			z-index: 100;
+			top: 25px;
+			right: 320px;
+			color: #1b95e0;
+			background-color: #fff;
+			font-size: 20px;
+			padding: 2px 8px;
+			cursor: pointer;
+		}
+		
+		#resultLayer{
+			position: absolute;
+			z-index: 100;
+			top: 65px;
+			right: 320px;
+			padding: 10px;
+			background-color: #fff;
+			text-align: right;
+		}
+		
+		#oilInfoLayer{
+			width: 100%;
+			padding: 15px 0;
+			background-color: #fff;
+			position: absolute;
+			left: 0;
+			bottom: 0;
+			z-index: 9999;
+			-webkit-transform: translateY(100%);
+			-moz-transform: translateY(100%);
+			-o-transform: translateY(100%);
+			transform: translateY(100%);
+			-webkit-transition: all .4s ease-in;
+			-moz-transition: all .4s ease-in;
+			-o-transition: all .4s ease-in;
+			transition: all .4s ease-in;
+			display: none;
+		}
+		#oilInfoLayer.on{
+			-webkit-transform: translateY(0);
+			-moz-transform: translateY(0);
+			-o-transform: translateY(0);
+			transform: translateY(0);
+		}
+		#oilInfoLayer .close{
+			position: absolute;
+			right: 0;
+			top: 0;
+			color: #ccc;
+			font-size: 20px;
+			font-family: inherit;
+			text-shadow: 0 1px 0 #fff;
+			border: 0;
+			background-color: #fff;
+		}
+		#oilInfoLayer h1{
+			margin-top: 0;
+			font-weight: 300;
+			font-size: 16px;
+			padding-bottom: 15px;
+		}
+		#oilInfoLayer table{
+			border: 1px solid #ddd;
+		}
+		#oilInfoLayer table, .info-window > td{
+			border-collapse: collapse;
+		}
+		#oilInfoLayer table tr{
+			border-bottom: 1px solid #ddd;
+		}
+		#oilInfoLayer table tr.price > td > strong{
+			color: #ff3e00;
+		}
+		#oilInfoLayer table td{
+			border: 1px solid #eee;
+			text-align: center;
+			padding: 10px;
+		}
+
+		@media all and (max-width:768px) {
+			#oilInfoLayer{
+				display: block;
+			}
+			.map-wrapper{
+				padding-right: 0;
+			}
+			#stationList{
+				display: none;
+			}
+			#resultLayer{
+				right: 25px;
+				font-size: 13px;
+			}
+			#reloadLocationLayer{
+				right: 25px;
+			}
+		}
+	</style>
+	<link rel="stylesheet" type="text/css" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" />
+</head>
+<body>
+<div class="map-wrapper">
+	<div id="map" style="width:100%;height:100%;"></div>
+</div>
+<ul id="stationList"></ul>
+<div class="filterLayer layer">
+	<div class="filter-wrap">
+		<span id="stationRadiusValue">2KM 이내</span>
+		<select id="selectStationRadius">
+			<option value="1000">1KM 이내</option>
+			<option value="2000" selected="selected">2KM 이내</option>
+			<option value="3000">3KM 이내</option>
+			<option value="4000">4KM 이내</option>
+			<option value="5000">5KM 이내</option>
+		</select>
+	</div>
+	<div class="filter-wrap">
+		<span id="prodcdValue">휘발유</span>
+		<select id="selectProdcd">
+			<option value="B027" selected="selected">휘발유</option>
+			<option value="D047">경유</option>
+			<option value="B034">고급휘발유</option>
+			<option value="K015">LPG</option>
+			<option value="C004">등유</option>
+		</select>
+	</div>
+</div>
+<div id="resultLayer" class="layer"></div>
+<div id="reloadLocationLayer" class="layer" title="현재위치" onclick="getGeoLocation()">
+	<i class="ion-android-locate"></i>
+</div>
+<div id="oilInfoLayer">
+	<div style="padding: 0 15px;position:relative;">
+		<button type="button" class="close" onclick="$('#oilInfoLayer').removeClass('on')">×</button>
+		<h1 class="name"></h1>
+		<table cellpadding="0">
+			<tbody>
+				<tr>
+					<td width="25%">휘발유</td>
+					<td width="25%">고급휘발유</td>
+					<td width="25%">경유</td>
+					<td width="25%">LPG</td>
+				</tr>
+				<tr class="price">
+					<td class="B027">-</td>
+					<td class="B034">-</td>
+					<td class="D047">-</td>
+					<td class="K015">-</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="js/jquery.xdomainajax.js"></script>
+<script type="text/javascript" src="http://openapi.map.naver.com/openapi/naverMap.naver?ver=2.0&key=8b2ac9d7b679dde4509ce03a80c39938"></script>
+<script type="text/javascript">
+	var radius = 2000;
+	var prodcd = "B027";
+	var station;
+	var oSize = new nhn.api.map.Size(55, 27);
+	var oOffset = new nhn.api.map.Size(14, 37);
+	var markerWindow = new nhn.api.map.InfoWindow();
+	markerWindow.setVisible(false);
+	
+	var oilIcon = {
+		"NHO":"https://ssl.pstatic.net/sstatic/keypage/outside/gas/img/img_logo8.jpg",
+		"SKE":"https://ssl.pstatic.net/sstatic/keypage/outside/gas/img/img_logo2.jpg",
+		"GSC":"https://ssl.pstatic.net/sstatic/keypage/outside/gas/img/img_logo3.jpg",
+		"SOL":"https://ssl.pstatic.net/sstatic/keypage/outside/gas/img/img_logo4.jpg",
+		"RTX":"https://ssl.pstatic.net/sstatic/keypage/outside/gas/img/img_logo7.jpg",
+		"HDO":"https://ssl.pstatic.net/sstatic/keypage/outside/gas/img/img_logo.jpg",
+		"ETC":"https://ssl.pstatic.net/sstatic/keypage/outside/gas/img/img_logo6.jpg",
+		"RTO":"https://ssl.pstatic.net/sstatic/keypage/outside/gas/img/img_logo7.jpg",
+		"NCO":"https://ssl.pstatic.net/sstatic/keypage/outside/gas/img/img_logo6.jpg"};
+
+	oMap = new nhn.api.map.Map('map' ,{
+		point : new nhn.api.map.LatLng(37.5010226, 127.0396037),
+		zoom : 11,
+		enableWheelZoom : true,
+		enableDragPan : true,
+		enableDblClickZoom : false,
+		mapMode : 0,
+		activateTrafficMap : false,
+		activateBicycleMap : false,
+		minMaxLevel : [ 1, 14 ]
+	});
+
+	oMap.attach('click', function(oEvent) {
+		var oPoint = oEvent.point;
+		var oTarget = oEvent.target;
+		var lntlng = new nhn.api.map.LatLng(oEvent.point.getY(),oEvent.point.getX());
+
+		if (markerWindow.getVisible()) {
+			markerWindow.setVisible(false);
+			//detailOil(oEvent.target.getTitle().split("/")[0], oTarget.getPoint(), oEvent.target.getTitle().split("/")[1]);
+		}else{
+			oMap.setCenter(lntlng);	
+			var utmk = lntlng.toUTMK();
+			getAPI(utmk.x,utmk.y);
+		}
+	});
+	oMap.attach('mouseenter', function(oCustomEvent) {
+		
+	});
+
+	oMap.attach('mouseleave', function(oCustomEvent) {
+		
+	});
+	
+	$(function(){
+		station = $("#stationList");
+		getGeoLocation();
+
+		$("#selectStationRadius").change(function(){
+			radius = this.value;
+			$("#stationRadiusValue").html($("option:selected", this).text());
+			var utmk = new nhn.api.map.LatLng(oMap.getCenter().y,oMap.getCenter().x).toUTMK();
+			getAPI(utmk.x,utmk.y);
+		});
+
+		$("#selectProdcd").change(function(){
+			prodcd = this.value;
+			$("#prodcdValue").html($("option:selected", this).text());
+			var utmk = new nhn.api.map.LatLng(oMap.getCenter().y,oMap.getCenter().x).toUTMK();
+			getAPI(utmk.x,utmk.y);
+		});
+	});
+
+	function numberWithCommas(x){
+		return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	}
+
+	function getGeoLocation(){
+		if("geolocation" in navigator){
+			//console.log("지오로케이션 사용 가능");
+			navigator.geolocation.getCurrentPosition(function(position) {
+				oMap.setCenter(new nhn.api.map.LatLng(position.coords.latitude,position.coords.longitude));
+				var utmk = new nhn.api.map.LatLng(position.coords.latitude,position.coords.longitude).toUTMK();
+				getAPI(utmk.x,utmk.y);
+			}, function(error){
+				alert("현재 위치를 불러올 수 없습니다.");
+				console.log(error);
+			});
+		}else{
+			//console.log("지오로케이션 사용 불가능");
+		}
+	}
+
+	function getAPI(x, y){
+		var param = {
+			"service_seq" : "431",
+			"epUrl" : "/Oil/OilPreAreaPointOfStation.jsp",
+			"method" : "GET",
+			"param" : "?OutPut=Json&X="+x+"&Y="+y+"&radius="+radius+"&Prodcd="+prodcd+"&sort=2"
+		};
+		$.ajax({
+			type : "GET"
+			, url : "http://api.yjteam.co.kr/api/station"
+			, dataType : "JSONP"
+			, jsonpCallback: "callback"
+			, data : param
+			, timeout : 5000
+			, error : function(){
+				console.log("error");
+			}
+			, beforeSend : function(xhr){
+				//xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+				//xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+				station.html("<li class='loading'>불러오는중...</li>");
+
+			}
+			, success : function(response){
+				//console.log(response);
+				var data = JSON.parse(response.resBody);
+				//console.log(data);
+				station.empty();
+				oMap.clearOverlay();
+				oMap.addOverlay(markerWindow);
+
+				var currentLocationMarker = new nhn.api.map.Marker(new nhn.api.map.Icon("/img/location_pin.png", new nhn.api.map.Size(30, 30), oOffset), {
+					point : new nhn.api.map.UTMK(x,y),
+					title : "현재위치"
+				});
+				oMap.addOverlay(currentLocationMarker);
+				for(var i=0;i<data.result.Oil.length;i++){
+					/*var oIcon = new nhn.api.map.Icon(oilIcon[data.result.Oil[i].POLL_DIV_CO], oSize, oOffset);
+					var oMarker = new nhn.api.map.Marker(oIcon, {
+						point : new nhn.api.map.UTMK(data.result.Oil[i].GIS_X_COOR, data.result.Oil[i].GIS_Y_COOR),
+						title : data.result.Oil[i].OS_NM+"/"+data.result.Oil[i].UNI_ID
+					});
+					oMap.addOverlay(oMarker);*/
+					station.append("<li onclick='movedOil(\""+data.result.Oil[i].OS_NM+"\","+data.result.Oil[i].GIS_X_COOR+","+ data.result.Oil[i].GIS_Y_COOR+","+data.result.Oil[i].UNI_ID+")'><img src='"+oilIcon[data.result.Oil[i].POLL_DIV_CO]+"' class='logo'><div class='name'>"+data.result.Oil[i].OS_NM+"</div><div class='price'><strong>"+numberWithCommas(data.result.Oil[i].PRICE)+"</strong>원</div></li>");
+
+					var infoWindow = new nhn.api.map.InfoWindow({
+						point : new nhn.api.map.UTMK(data.result.Oil[i].GIS_X_COOR, data.result.Oil[i].GIS_Y_COOR),
+						content : "<div class='maker-window' onclick='detailOil("+data.result.Oil[i].GIS_X_COOR+", "+data.result.Oil[i].GIS_Y_COOR+","+data.result.Oil[i].UNI_ID+")'><span class='logo "+data.result.Oil[i].POLL_DIV_CO+"'></span><span class='name'>"+numberWithCommas(data.result.Oil[i].PRICE)+"</span></div>"
+					});
+					infoWindow.setVisible(true);
+					//infoWindow.setPosition({right : -20, top : 20});
+					oMap.addOverlay(infoWindow);
+				}
+				
+				$("#resultLayer").html("<div>"+data.result.Oil.length+"개</div><div onclick='movedOil(\""+data.result.Oil[0].OS_NM+"\","+data.result.Oil[0].GIS_X_COOR+","+ data.result.Oil[0].GIS_Y_COOR+","+data.result.Oil[0].UNI_ID+")'>최저 <span style='color:#4472e9;'>"+numberWithCommas(data.result.Oil[0].PRICE)+"</span>원</div><div onclick='movedOil(\""+data.result.Oil[data.result.Oil.length-1].OS_NM+"\","+data.result.Oil[data.result.Oil.length-1].GIS_X_COOR+","+ data.result.Oil[data.result.Oil.length-1].GIS_Y_COOR+","+data.result.Oil[data.result.Oil.length-1].UNI_ID+")'>최고 <span style='color:#f0411e;'>"+numberWithCommas(data.result.Oil[data.result.Oil.length-1].PRICE)+"</span>원</div>");
+			}
+			, complete : function(response){
+
+			}
+		});
+	}
+
+	function detailOil(x, y, id){
+		oMap.setCenter(new nhn.api.map.UTMK(x, y));
+		$.ajax({
+			type : "GET"
+			, url : "http://api.yjteam.co.kr/api/station"
+			, dataType : "JSONP"
+			, jsonpCallback: "callback"
+			, data : 
+				{
+					"service_seq" : "431",
+					"epUrl" : "/Oil/OilResult.jsp",
+					"method" : "GET",
+					"param" : "?OutPut=Json&UniId="+id
+				}
+			, timeout : 5000
+			, error : function(){
+				console.log("error");
+			}
+			, beforeSend : function(xhr){
+				xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+				xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+			}
+			, success : function(response){
+				var data = JSON.parse(response.resBody);
+				console.log(data);
+				var oilType = {"B027":"-","B034":"-","D047":"-","K015":"-"}
+				for(var i=0;i<data.result.Oil.Oil_price.length;i++){
+					oilType[data.result.Oil.Oil_price[i].PRODCD] = "<strong>"+numberWithCommas(data.result.Oil.Oil_price[i].PRICE)+"</strong>원";
+				}
+
+				if($(window).width() >= 768){
+					markerWindow.setContent("<div class='info-window'><div class='info-top'>"+data.result.Oil.OS_NM+"</div><table cellpadding='0'><tr><td>휘발유</td><td>고급휘발유</td><td>경유</td><td>LPG</td></tr><tr class='price'><td>"+oilType['B027']+"</td><td>"+oilType['B034']+"</td><td>"+oilType['D047']+"</td><td>"+oilType['K015']+"</td></tr></table></div>");
+					markerWindow.setPoint(new nhn.api.map.UTMK(x, y));
+					markerWindow.setVisible(true);
+					markerWindow.setPosition({right : 0, top : 16});
+					markerWindow.autoPosition();
+				}else{
+					var target = $("#oilInfoLayer");
+					target.find(".name").html(data.result.Oil.OS_NM);
+					target.find(".B027").html(oilType['B027']);
+					target.find(".B034").html(oilType['B034']);
+					target.find(".D047").html(oilType['D047']);
+					target.find(".K015").html(oilType['K015']);
+					target.addClass("on");
+				}
+			}
+		});
+	}
+
+	function movedOil(name, x, y, id){
+		oMap.setCenter(new nhn.api.map.UTMK(x, y));
+		var coord = new nhn.api.map.UTMK(x, y);
+		//detailOil(name, coord, id);
+	}
+</script>
+</body>
+</html>
