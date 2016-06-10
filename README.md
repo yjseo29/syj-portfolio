@@ -1,2 +1,2 @@
-##ΖχΖ®ΖϊΈ®Ώΐ
-(http://syj.yjteam.co.kr)
+##ν¬νΈν΄λ¦¬μ¤ μ‚¬μ΄νΈ
+http://syj.yjteam.co.kr
